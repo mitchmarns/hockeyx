@@ -41,7 +41,7 @@
             margin-bottom: 20px;
         }
 
-        .btn-simulate {
+        .btn-simulate, .btn-restart {
             padding: 10px 20px;
             background-color: #003366;
             color: white;
@@ -51,7 +51,7 @@
             font-size: 16px;
         }
 
-        .btn-simulate:hover {
+        .btn-simulate:hover, .btn-restart:hover {
             background-color: #00509e;
         }
 
@@ -115,6 +115,7 @@
     <div class="schedule-header">
         <h2>Season Schedule & Results</h2>
         <button class="btn-simulate" id="simulate-button" onclick="simulateNextGame()">Simulate Next Game</button>
+        <button class="btn-restart" id="restart-button" onclick="restartSeason()">Restart Season</button>
     </div>
 
     <!-- Schedule Table -->
@@ -173,6 +174,8 @@
                     <th>Goals</th>
                     <th>Assists</th>
                     <th>Games Played</th>
+                    <th>Skill</th>
+                    <th>Injured</th>
                 </tr>
             </thead>
             <tbody id="players-body">
@@ -183,8 +186,8 @@
 </div>
 
 <script>
-// Define the teams and their players
-const teams = [
+// Initial Teams and Players Data (simplified)
+const initialTeamsData = [
     { 
         name: "Ice Wolves", 
         logo: "https://via.placeholder.com/30?text=IW", 
@@ -192,9 +195,9 @@ const teams = [
         losses: 0, 
         points: 0,
         players: [
-            { name: "Alex Hunter", goals: 0, assists: 0, games: 0 },
-            { name: "Ben Steele", goals: 0, assists: 0, games: 0 },
-            { name: "Chris Frost", goals: 0, assists: 0, games: 0 }
+            { name: "Alex Hunter", skill: 85, goals: 0, assists: 0, games: 0, injured: false },
+            { name: "Ben Steele", skill: 75, goals: 0, assists: 0, games: 0, injured: false },
+            { name: "Chris Frost", skill: 90, goals: 0, assists: 0, games: 0, injured: false }
         ]
     },
     { 
@@ -204,9 +207,9 @@ const teams = [
         losses: 0, 
         points: 0,
         players: [
-            { name: "Sam King", goals: 0, assists: 0, games: 0 },
-            { name: "Jack Reeve", goals: 0, assists: 0, games: 0 },
-            { name: "Zane Thunder", goals: 0, assists: 0, games: 0 }
+            { name: "Sam King", skill: 80, goals: 0, assists: 0, games: 0, injured: false },
+            { name: "Jack Reeve", skill: 70, goals: 0, assists: 0, games: 0, injured: false },
+            { name: "Zane Thunder", skill: 88, goals: 0, assists: 0, games: 0, injured: false }
         ]
     },
     { 
@@ -216,9 +219,9 @@ const teams = [
         losses: 0, 
         points: 0,
         players: [
-            { name: "Markus North", goals: 0, assists: 0, games: 0 },
-            { name: "Dylan White", goals: 0, assists: 0, games: 0 },
-            { name: "Parker Gale", goals: 0, assists: 0, games: 0 }
+            { name: "Markus North", skill: 78, goals: 0, assists: 0, games: 0, injured: false },
+            { name: "Dylan White", skill: 74, goals: 0, assists: 0, games: 0, injured: false },
+            { name: "Parker Gale", skill: 82, goals: 0, assists: 0, games: 0, injured: false }
         ]
     },
     { 
@@ -228,97 +231,103 @@ const teams = [
         losses: 0, 
         points: 0,
         players: [
-            { name: "Liam Forge", goals: 0, assists: 0, games: 0 },
-            { name: "Tyler Burns", goals: 0, assists: 0, games: 0 },
-            { name: "Eli Grant", goals: 0, assists: 0, games: 0 }
+            { name: "Liam Forge", skill: 85, goals: 0, assists: 0, games: 0, injured: false },
+            { name: "Tyler Burns", skill: 77, goals: 0, assists: 0, games: 0, injured: false },
+            { name: "Eli Grant", skill: 80, goals: 0, assists: 0, games: 0, injured: false }
         ]
     }
 ];
 
-// Generate a full schedule with 82 games per team
-const totalGamesPerTeam = 82;
+let teams = JSON.parse(JSON.stringify(initialTeamsData)); // Clone initial teams data
 let schedule = [];
+let currentGameIndex = 0;
 
-// Create a basic round-robin schedule
+// Generate a full schedule with 82 games per team
 function generateSchedule() {
     let gamesPlayed = Array(teams.length).fill(0); // Track games played per team
+    schedule = [];  // Reset schedule before generating new one
     
     for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
         let team = teams[teamIndex];
         
-        while (gamesPlayed[teamIndex] < totalGamesPerTeam) {
+        while (gamesPlayed[teamIndex] < 82) {
             for (let opponentIndex = 0; opponentIndex < teams.length; opponentIndex++) {
-                if (teamIndex !== opponentIndex && gamesPlayed[teamIndex] < totalGamesPerTeam && gamesPlayed[opponentIndex] < totalGamesPerTeam) {
-                    const opponent = teams[opponentIndex];
+                if (teamIndex !== opponentIndex && gamesPlayed[opponentIndex] < 82) {
                     const date = new Date();
-                    date.setDate(date.getDate() + schedule.length);  // Schedule games on consecutive days
+                    date.setDate(date.getDate() + schedule.length); // Schedule games on consecutive days
                     
                     schedule.push({
                         date: date.toDateString(),
                         team1: team,
-                        team2: opponent,
+                        team2: teams[opponentIndex],
                         score1: null,
                         score2: null,
                         result: null
                     });
-
+                    
                     gamesPlayed[teamIndex]++;
                     gamesPlayed[opponentIndex]++;
+                    if (gamesPlayed[teamIndex] >= 82) break;
                 }
             }
         }
     }
 }
 
-// Simulate the game and update player stats
+// Simulate the game
 function simulateGame(game) {
-    let score1 = getRandomScore();
-    let score2 = getRandomScore();
-
-    // If scores are tied, add overtime
-    while (score1 === score2) {
-        // Simulate overtime: give a bonus goal randomly to break the tie
-        score1 = getRandomScore();
-        score2 = getRandomScore();
-    }
-
+    const score1 = calculateScore(game.team1);
+    const score2 = calculateScore(game.team2);
     game.score1 = score1;
     game.score2 = score2;
 
-    // Update game stats
+    // Determine the winner
     if (score1 > score2) {
         game.result = `${game.team1.name} wins!`;
-        game.team1.wins += 1;
-        game.team2.losses += 1;
+        game.team1.wins++;
+        game.team2.losses++;
         game.team1.points += 2;
     } else {
         game.result = `${game.team2.name} wins!`;
-        game.team2.wins += 1;
-        game.team1.losses += 1;
+        game.team2.wins++;
+        game.team1.losses++;
         game.team2.points += 2;
     }
 
-    // Update player stats with randomly assigned goals and assists
-    game.team1.players.forEach(player => {
-        const goals = Math.floor(Math.random() * score1); 
-        const assists = Math.floor(Math.random() * goals);
-        player.goals += goals;
-        player.assists += assists;
-        player.games += 1;
-    });
+    // Random injury mechanic: Some players may get injured
+    handleInjuries(game.team1);
+    handleInjuries(game.team2);
 
-    game.team2.players.forEach(player => {
-        const goals = Math.floor(Math.random() * score2); 
-        const assists = Math.floor(Math.random() * goals); 
-        player.goals += goals;
-        player.assists += assists;
-        player.games += 1;
+    // Update player stats
+    updatePlayerStats(game.team1, score1);
+    updatePlayerStats(game.team2, score2);
+}
+
+// Calculate score based on team skill levels
+function calculateScore(team) {
+    let totalSkill = team.players.reduce((acc, player) => acc + (player.injured ? player.skill / 2 : player.skill), 0);
+    return Math.floor(totalSkill / team.players.length / 10); // Score based on average skill
+}
+
+// Handle injuries after a game (20% chance of injury)
+function handleInjuries(team) {
+    team.players.forEach(player => {
+        if (Math.random() < 0.2) {  // 20% chance for injury
+            player.injured = true;
+            player.skill = Math.max(0, player.skill - 10);  // Decrease skill by 10 (or to 0)
+        }
     });
 }
 
-// Random score generator
-function getRandomScore() {
-    return Math.floor(Math.random() * 6); // Score range between 0 and 5
+// Update player stats after each game
+function updatePlayerStats(team, score) {
+    team.players.forEach(player => {
+        const goals = Math.floor(Math.random() * score);
+        const assists = Math.floor(Math.random() * goals);
+        player.goals += goals;
+        player.assists += assists;
+        player.games++;
+    });
 }
 
 // Update the schedule table
@@ -334,7 +343,7 @@ function updateScheduleTable() {
             <td>${game.score1 !== null ? game.score1 : '--'}</td>
             <td><img class="team-logo" src="${game.team2.logo}" alt="${game.team2.name}">${game.team2.name}</td>
             <td>${game.score2 !== null ? game.score2 : '--'}</td>
-            <td class="${game.result ? (game.result.includes('win') ? 'result-win' : 'result-loss') : ''}">${game.result || '--'}</td>
+            <td class="${game.result.includes('win') ? 'result-win' : game.result.includes('tie') ? 'result-overtime' : 'result-loss'}">${game.result || '--'}</td>
         `;
         scheduleBody.appendChild(row);
     });
@@ -373,14 +382,13 @@ function updatePlayerStatsTable() {
                 <td>${player.goals}</td>
                 <td>${player.assists}</td>
                 <td>${player.games}</td>
+                <td>${player.skill}</td>
+                <td>${player.injured ? 'Yes' : 'No'}</td>
             `;
             playersBody.appendChild(row);
         });
     });
 }
-
-// Track the index of the next game to simulate
-let currentGameIndex = 0;
 
 // Simulate the next game
 function simulateNextGame() {
@@ -398,6 +406,17 @@ function simulateNextGame() {
 
     // Move to the next game
     currentGameIndex++;
+}
+
+// Restart the season
+function restartSeason() {
+    teams = JSON.parse(JSON.stringify(initialTeamsData)); // Reset teams to their initial state
+    currentGameIndex = 0;
+    generateSchedule();
+    updateScheduleTable();
+    updateStandingsTable();
+    updatePlayerStatsTable();
+    document.getElementById('simulate-button').disabled = false;
 }
 
 // Generate the schedule when the page loads
