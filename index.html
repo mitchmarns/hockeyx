@@ -3,64 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fictional Hockey League with Players</title>
+    <title>Fictional Hockey League</title>
     <style>
-        /* Basic Reset */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            color: #333;
+            margin: 0;
             padding: 20px;
         }
 
-        h1 {
-            text-align: center;
-            color: #003366;
-        }
-
-        /* Layout Containers */
-        .container {
-            width: 90%;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .schedule-header, .standings-header, .players-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .btn-simulate, .btn-restart {
-            padding: 10px 20px;
-            background-color: #003366;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        .btn-simulate:hover, .btn-restart:hover {
-            background-color: #00509e;
-        }
-
-        .btn-simulate:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        /* Tables */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -68,7 +19,7 @@
         }
 
         th, td {
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             border: 1px solid #ddd;
         }
@@ -82,346 +33,132 @@
             background-color: #fff;
         }
 
-        .team-logo {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
+        .btn {
+            padding: 10px 20px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
         }
 
-        .result-win {
-            color: green;
-        }
-
-        .result-loss {
-            color: red;
-        }
-
-        .result-overtime {
-            color: orange;
-        }
-
-        .scrollable-table {
-            max-height: 400px;
-            overflow-y: auto;
+        .btn:hover {
+            background-color: #00509e;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Fictional Hockey League with Players</h1>
+<h1>Fictional Hockey League</h1>
 
-    <!-- Game Simulation Section -->
-    <div class="schedule-header">
-        <h2>Season Schedule & Results</h2>
-        <button class="btn-simulate" id="simulate-button" onclick="simulateNextGame()">Simulate Next Game</button>
-        <button class="btn-restart" id="restart-button" onclick="restartSeason()">Restart Season</button>
-    </div>
+<!-- Simulate Button -->
+<button class="btn" id="simulate-button" onclick="simulateNextGame()">Simulate Next Game</button>
 
-    <!-- Schedule Table -->
-    <div class="scrollable-table">
-        <table id="schedule-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Team 1</th>
-                    <th>Score</th>
-                    <th>Team 2</th>
-                    <th>Score</th>
-                    <th>Result</th>
-                </tr>
-            </thead>
-            <tbody id="schedule-body">
-                <!-- Game rows will be dynamically added -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Standings Section -->
-    <div class="standings-header">
-        <h2>League Standings</h2>
-    </div>
-
-    <!-- Standings Table -->
-    <div class="scrollable-table">
-        <table id="standings-table">
-            <thead>
-                <tr>
-                    <th>Team</th>
-                    <th>W</th>
-                    <th>L</th>
-                    <th>Points</th>
-                </tr>
-            </thead>
-            <tbody id="standings-body">
-                <!-- Standings rows will be dynamically added -->
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Players Section -->
-    <div class="players-header">
-        <h2>Player Stats</h2>
-    </div>
-
-    <!-- Player Stats Table -->
-    <div class="scrollable-table">
-        <table class="player-stats-table">
-            <thead>
-                <tr>
-                    <th>Team</th>
-                    <th>Player</th>
-                    <th>Goals</th>
-                    <th>Assists</th>
-                    <th>Games Played</th>
-                    <th>Skill</th>
-                    <th>Injured</th>
-                </tr>
-            </thead>
-            <tbody id="players-body">
-                <!-- Player stats rows will be dynamically added -->
-            </tbody>
-        </table>
-    </div>
-</div>
+<!-- Schedule Table -->
+<h2>Season Schedule</h2>
+<table id="schedule-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Team 1</th>
+            <th>Score</th>
+            <th>Team 2</th>
+            <th>Score</th>
+        </tr>
+    </thead>
+    <tbody id="schedule-body">
+        <!-- Schedule will be dynamically inserted here -->
+    </tbody>
+</table>
 
 <script>
-// Initial Teams and Players Data (simplified)
-const initialTeamsData = [
-    { 
-        name: "Ice Wolves", 
-        logo: "https://via.placeholder.com/30?text=IW", 
-        wins: 0, 
-        losses: 0, 
-        points: 0,
-        players: [
-            { name: "Alex Hunter", skill: 85, goals: 0, assists: 0, games: 0, injured: false },
-            { name: "Ben Steele", skill: 75, goals: 0, assists: 0, games: 0, injured: false },
-            { name: "Chris Frost", skill: 90, goals: 0, assists: 0, games: 0, injured: false }
-        ]
-    },
-    { 
-        name: "Thunderbirds", 
-        logo: "https://via.placeholder.com/30?text=TB", 
-        wins: 0, 
-        losses: 0, 
-        points: 0,
-        players: [
-            { name: "Sam King", skill: 80, goals: 0, assists: 0, games: 0, injured: false },
-            { name: "Jack Reeve", skill: 70, goals: 0, assists: 0, games: 0, injured: false },
-            { name: "Zane Thunder", skill: 88, goals: 0, assists: 0, games: 0, injured: false }
-        ]
-    },
-    { 
-        name: "Blizzard", 
-        logo: "https://via.placeholder.com/30?text=BZ", 
-        wins: 0, 
-        losses: 0, 
-        points: 0,
-        players: [
-            { name: "Markus North", skill: 78, goals: 0, assists: 0, games: 0, injured: false },
-            { name: "Dylan White", skill: 74, goals: 0, assists: 0, games: 0, injured: false },
-            { name: "Parker Gale", skill: 82, goals: 0, assists: 0, games: 0, injured: false }
-        ]
-    },
-    { 
-        name: "Raging Bulls", 
-        logo: "https://via.placeholder.com/30?text=RB", 
-        wins: 0, 
-        losses: 0, 
-        points: 0,
-        players: [
-            { name: "Liam Forge", skill: 85, goals: 0, assists: 0, games: 0, injured: false },
-            { name: "Tyler Burns", skill: 77, goals: 0, assists: 0, games: 0, injured: false },
-            { name: "Eli Grant", skill: 80, goals: 0, assists: 0, games: 0, injured: false }
-        ]
-    }
-];
+    // Initial Teams Data
+    const teams = [
+        { name: "Ice Wolves", logo: "https://via.placeholder.com/30?text=IW", wins: 0, losses: 0, points: 0 },
+        { name: "Thunderbirds", logo: "https://via.placeholder.com/30?text=TB", wins: 0, losses: 0, points: 0 },
+        { name: "Blizzard", logo: "https://via.placeholder.com/30?text=BZ", wins: 0, losses: 0, points: 0 },
+        { name: "Raging Bulls", logo: "https://via.placeholder.com/30?text=RB", wins: 0, losses: 0, points: 0 }
+    ];
 
-let teams = JSON.parse(JSON.stringify(initialTeamsData)); // Clone initial teams data
-let schedule = [];
-let currentGameIndex = 0;
+    let schedule = [];
+    let currentGameIndex = 0;
 
-// Generate a full schedule with 82 games per team
-function generateSchedule() {
-    let gamesPlayed = Array(teams.length).fill(0); // Track games played per team
-    schedule = [];  // Reset schedule before generating new one
-    
-    for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
-        let team = teams[teamIndex];
-        
-        while (gamesPlayed[teamIndex] < 82) {
-            let opponentIndex = Math.floor(Math.random() * teams.length);
-            if (opponentIndex === teamIndex || gamesPlayed[opponentIndex] >= 82) continue;
-            
-            const date = new Date();
-            date.setDate(date.getDate() + schedule.length);  // Schedule games on consecutive days
-            
-            schedule.push({
-                date: date.toDateString(),
-                team1: team,
-                team2: teams[opponentIndex],
-                score1: null,
-                score2: null,
-                result: null
-            });
-            
-            gamesPlayed[teamIndex]++;
-            gamesPlayed[opponentIndex]++;
+    // Generate a full schedule with 82 games per team
+    function generateSchedule() {
+        let gamesPlayed = Array(teams.length).fill(0); // Track games played per team
+        schedule = [];  // Reset schedule before generating new one
+
+        for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
+            let team = teams[teamIndex];
+
+            while (gamesPlayed[teamIndex] < 82) {
+                let opponentIndex = Math.floor(Math.random() * teams.length);
+                if (opponentIndex === teamIndex || gamesPlayed[opponentIndex] >= 82) continue;
+
+                const date = new Date();
+                date.setDate(date.getDate() + schedule.length);  // Schedule games on consecutive days
+
+                schedule.push({
+                    date: date.toDateString(),
+                    team1: team,
+                    team2: teams[opponentIndex],
+                    score1: null,
+                    score2: null
+                });
+
+                gamesPlayed[teamIndex]++;
+                gamesPlayed[opponentIndex]++;
+            }
         }
     }
-}
 
-// Simulate the game
-function simulateGame(game) {
-    const score1 = calculateScore(game.team1);
-    const score2 = calculateScore(game.team2);
-    game.score1 = score1;
-    game.score2 = score2;
+    // Simulate the next game
+    function simulateNextGame() {
+        if (currentGameIndex >= schedule.length) {
+            alert("All games have been simulated.");
+            return;
+        }
 
-    // Determine the winner
-    if (score1 > score2) {
-        game.result = `${game.team1.name} wins!`;
-        game.team1.wins++;
-        game.team2.losses++;
-        game.team1.points += 2;
-    } else {
-        game.result = `${game.team2.name} wins!`;
-        game.team2.wins++;
-        game.team1.losses++;
-        game.team2.points += 2;
+        const game = schedule[currentGameIndex];
+        game.score1 = Math.floor(Math.random() * 6);  // Random score between 0 and 5
+        game.score2 = Math.floor(Math.random() * 6);
+
+        // Determine the winner
+        if (game.score1 > game.score2) {
+            game.result = `${game.team1.name} wins!`;
+            game.team1.wins++;
+            game.team2.losses++;
+        } else {
+            game.result = `${game.team2.name} wins!`;
+            game.team2.wins++;
+            game.team1.losses++;
+        }
+
+        currentGameIndex++;
+        updateScheduleTable();
     }
 
-    // Random injury mechanic
-    handleInjuries(game.team1);
-    handleInjuries(game.team2);
+    // Update the schedule table
+    function updateScheduleTable() {
+        const scheduleBody = document.getElementById('schedule-body');
+        scheduleBody.innerHTML = '';
 
-    // Update player stats
-    updatePlayerStats(game.team1, score1);
-    updatePlayerStats(game.team2, score2);
-}
-
-// Calculate score based on team skill levels
-function calculateScore(team) {
-    let totalSkill = team.players.reduce((acc, player) => acc + (player.injured ? player.skill / 2 : player.skill), 0);
-    return Math.floor(totalSkill / team.players.length / 10); // Score based on average skill
-}
-
-// Handle injuries after a game (20% chance of injury)
-function handleInjuries(team) {
-    team.players.forEach(player => {
-        if (Math.random() < 0.2) {  // 20% chance for injury
-            player.injured = true;
-            player.skill = Math.max(0, player.skill - 10);  // Decrease skill by 10 (or to 0)
-        }
-    });
-}
-
-// Update player stats after each game
-function updatePlayerStats(team, score) {
-    team.players.forEach(player => {
-        const goals = Math.floor(Math.random() * score);
-        const assists = Math.floor(Math.random() * goals);
-        player.goals += goals;
-        player.assists += assists;
-        player.games++;
-    });
-}
-
-// Update the schedule table
-function updateScheduleTable() {
-    const scheduleBody = document.getElementById('schedule-body');
-    scheduleBody.innerHTML = '';
-    schedule.forEach(game => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${game.date}</td>
-            <td><img class="team-logo" src="${game.team1.logo}" alt="${game.team1.name}">${game.team1.name}</td>
-            <td>${game.score1 !== null ? game.score1 : '--'}</td>
-            <td><img class="team-logo" src="${game.team2.logo}" alt="${game.team2.name}">${game.team2.name}</td>
-            <td>${game.score2 !== null ? game.score2 : '--'}</td>
-            <td class="${game.result.includes('win') ? 'result-win' : 'result-loss'}">${game.result || '--'}</td>
-        `;
-        scheduleBody.appendChild(row);
-    });
-}
-
-// Update the standings table
-function updateStandingsTable() {
-    const standingsBody = document.getElementById('standings-body');
-    standingsBody.innerHTML = '';
-
-    const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
-
-    sortedTeams.forEach(team => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${team.name}</td>
-            <td>${team.wins}</td>
-            <td>${team.losses}</td>
-            <td>${team.points}</td>
-        `;
-        standingsBody.appendChild(row);
-    });
-}
-
-// Update the player stats table
-function updatePlayerStatsTable() {
-    const playersBody = document.getElementById('players-body');
-    playersBody.innerHTML = '';
-
-    teams.forEach(team => {
-        team.players.forEach(player => {
+        schedule.forEach(game => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${team.name}</td>
-                <td>${player.name}</td>
-                <td>${player.goals}</td>
-                <td>${player.assists}</td>
-                <td>${player.games}</td>
-                <td>${player.skill}</td>
-                <td>${player.injured ? 'Yes' : 'No'}</td>
+                <td>${game.date}</td>
+                <td><img src="${game.team1.logo}" alt="${game.team1.name}" /> ${game.team1.name}</td>
+                <td>${game.score1 !== null ? game.score1 : '--'}</td>
+                <td><img src="${game.team2.logo}" alt="${game.team2.name}" /> ${game.team2.name}</td>
+                <td>${game.score2 !== null ? game.score2 : '--'}</td>
             `;
-            playersBody.appendChild(row);
+            scheduleBody.appendChild(row);
         });
-    });
-}
-
-// Simulate the next game
-function simulateNextGame() {
-    if (currentGameIndex >= schedule.length) {
-        alert("All games have been simulated.");
-        document.getElementById('simulate-button').disabled = true;
-        return;
     }
 
-    const game = schedule[currentGameIndex];
-    simulateGame(game);
-    updateScheduleTable();
-    updateStandingsTable();
-    updatePlayerStatsTable();
-
-    // Move to the next game
-    currentGameIndex++;
-}
-
-// Restart the season
-function restartSeason() {
-    teams = JSON.parse(JSON.stringify(initialTeamsData)); // Reset teams to their initial state
-    currentGameIndex = 0;
+    // Initialize the season and generate the schedule
     generateSchedule();
     updateScheduleTable();
-    updateStandingsTable();
-    updatePlayerStatsTable();
-    document.getElementById('simulate-button').disabled = false;
-}
-
-// Generate the schedule when the page loads
-generateSchedule();
-updateScheduleTable();
-updateStandingsTable();
-updatePlayerStatsTable();
-
 </script>
 
 </body>
