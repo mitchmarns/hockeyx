@@ -251,25 +251,23 @@ function generateSchedule() {
         let team = teams[teamIndex];
         
         while (gamesPlayed[teamIndex] < 82) {
-            for (let opponentIndex = 0; opponentIndex < teams.length; opponentIndex++) {
-                if (teamIndex !== opponentIndex && gamesPlayed[opponentIndex] < 82) {
-                    const date = new Date();
-                    date.setDate(date.getDate() + schedule.length); // Schedule games on consecutive days
-                    
-                    schedule.push({
-                        date: date.toDateString(),
-                        team1: team,
-                        team2: teams[opponentIndex],
-                        score1: null,
-                        score2: null,
-                        result: null
-                    });
-                    
-                    gamesPlayed[teamIndex]++;
-                    gamesPlayed[opponentIndex]++;
-                    if (gamesPlayed[teamIndex] >= 82) break;
-                }
-            }
+            let opponentIndex = Math.floor(Math.random() * teams.length);
+            if (opponentIndex === teamIndex || gamesPlayed[opponentIndex] >= 82) continue;
+            
+            const date = new Date();
+            date.setDate(date.getDate() + schedule.length);  // Schedule games on consecutive days
+            
+            schedule.push({
+                date: date.toDateString(),
+                team1: team,
+                team2: teams[opponentIndex],
+                score1: null,
+                score2: null,
+                result: null
+            });
+            
+            gamesPlayed[teamIndex]++;
+            gamesPlayed[opponentIndex]++;
         }
     }
 }
@@ -294,7 +292,7 @@ function simulateGame(game) {
         game.team2.points += 2;
     }
 
-    // Random injury mechanic: Some players may get injured
+    // Random injury mechanic
     handleInjuries(game.team1);
     handleInjuries(game.team2);
 
@@ -334,7 +332,6 @@ function updatePlayerStats(team, score) {
 function updateScheduleTable() {
     const scheduleBody = document.getElementById('schedule-body');
     scheduleBody.innerHTML = '';
-
     schedule.forEach(game => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -424,6 +421,7 @@ generateSchedule();
 updateScheduleTable();
 updateStandingsTable();
 updatePlayerStatsTable();
+
 </script>
 
 </body>
