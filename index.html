@@ -107,6 +107,12 @@
         .player-stats-table td {
             padding: 5px;
         }
+
+        /* Scrollable tables */
+        .scrollable-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -121,21 +127,23 @@
     </div>
 
     <!-- Schedule Table -->
-    <table id="schedule-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Team 1</th>
-                <th>Score</th>
-                <th>Team 2</th>
-                <th>Score</th>
-                <th>Result</th>
-            </tr>
-        </thead>
-        <tbody id="schedule-body">
-            <!-- Game rows will be dynamically added -->
-        </tbody>
-    </table>
+    <div class="scrollable-table">
+        <table id="schedule-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Team 1</th>
+                    <th>Score</th>
+                    <th>Team 2</th>
+                    <th>Score</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-body">
+                <!-- Game rows will be dynamically added -->
+            </tbody>
+        </table>
+    </div>
 
     <!-- Standings Section -->
     <div class="standings-header">
@@ -143,20 +151,22 @@
     </div>
 
     <!-- Standings Table -->
-    <table id="standings-table">
-        <thead>
-            <tr>
-                <th>Team</th>
-                <th>W</th>
-                <th>L</th>
-                <th>T</th>
-                <th>Points</th>
-            </tr>
-        </thead>
-        <tbody id="standings-body">
-            <!-- Standings rows will be dynamically added -->
-        </tbody>
-    </table>
+    <div class="scrollable-table">
+        <table id="standings-table">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>T</th>
+                    <th>Points</th>
+                </tr>
+            </thead>
+            <tbody id="standings-body">
+                <!-- Standings rows will be dynamically added -->
+            </tbody>
+        </table>
+    </div>
 
     <!-- Players Section -->
     <div class="players-header">
@@ -164,20 +174,22 @@
     </div>
 
     <!-- Player Stats Table -->
-    <table class="player-stats-table">
-        <thead>
-            <tr>
-                <th>Team</th>
-                <th>Player</th>
-                <th>Goals</th>
-                <th>Assists</th>
-                <th>Games Played</th>
-            </tr>
-        </thead>
-        <tbody id="players-body">
-            <!-- Player stats rows will be dynamically added -->
-        </tbody>
-    </table>
+    <div class="scrollable-table">
+        <table class="player-stats-table">
+            <thead>
+                <tr>
+                    <th>Team</th>
+                    <th>Player</th>
+                    <th>Goals</th>
+                    <th>Assists</th>
+                    <th>Games Played</th>
+                </tr>
+            </thead>
+            <tbody id="players-body">
+                <!-- Player stats rows will be dynamically added -->
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
