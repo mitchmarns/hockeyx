@@ -340,7 +340,7 @@ function updateScheduleTable() {
             <td>${game.score1 !== null ? game.score1 : '--'}</td>
             <td><img class="team-logo" src="${game.team2.logo}" alt="${game.team2.name}">${game.team2.name}</td>
             <td>${game.score2 !== null ? game.score2 : '--'}</td>
-            <td class="${game.result.includes('win') ? 'result-win' : game.result.includes('tie') ? 'result-overtime' : 'result-loss'}">${game.result || '--'}</td>
+            <td class="${game.result.includes('win') ? 'result-win' : 'result-loss'}">${game.result || '--'}</td>
         `;
         scheduleBody.appendChild(row);
     });
