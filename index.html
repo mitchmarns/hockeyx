@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fictional Hockey League</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #003366;
+        }
+        .team-logo {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .game-table, .standings-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        .game-table th, .game-table td, .standings-table th, .standings-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+        .game-table th, .standings-table th {
+            background-color: #003366;
+            color: white;
+        }
+        .game-table td, .standings-table td {
+            background-color: #fff;
+        }
+        .team-name {
+            font-weight: bold;
+        }
+        .result-win {
+            color: green;
+        }
+        .result-loss {
+            color: red;
+        }
+        .result-tie {
+            color: orange;
+        }
+        .schedule-header, .standings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-simulate {
+            padding: 10px 20px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-simulate:hover {
+            background-color: #00509e;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Fictional Hockey League</h1>
+
+    <!-- Game Simulation Section -->
+    <div class="schedule-header">
+        <h2>Season Schedule & Results</h2>
+        <button class="btn-simulate" onclick="simulateSeason()">Simulate All Games</button>
+    </div>
+    <table class="game-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Team 1</th>
+                <th>Score</th>
+                <th>Team 2</th>
+                <th>Score</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody id="schedule-body">
+            <!-- Game rows will be inserted here by JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Standings Section -->
+    <div class="standings-header">
+        <h2>League Standings</h2>
+    </div>
+    <table class="standings-table">
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>W</th>
+                <th>L</th>
+                <th>T</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody id="standings-body">
+            <!-- Standings rows will be inserted here by JavaScript -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+// Define the teams
+const teams = [
+    { name: "Ice Wolves", logo: "https://via.placeholder.com/30?text=IW", wins: 0, losses: 0, ties: 0, points: 0 },
+    { name: "Thunderbirds", logo: "https://via.placeholder.com/30?text=TB", wins: 0, losses: 0, ties: 0, points: 0 },
+    { name: "Blizzard", logo: "https://via.placeholder.com/30?text=BZ", wins: 0, losses: 0, ties: 0, points: 0 },
+    { name: "Raging Bulls", logo: "https://via.placeholder.com/30?text=RB", wins: 0, losses: 0, ties: 0, points: 0 }
+];
+
+// Create a round-robin schedule
+const schedule = [];
+const getRandomScore = () => Math.floor(Math.random() * 6); // Random score between 0 and 5
+
+for (let i = 0; i < teams.length; i++) {
+    for (let j = i + 1; j < teams.length; j++) {
+        const date = new Date();
+        date.setDate(date.getDate() + schedule.length); // Schedule games on consecutive days
+
+        schedule.push({
+            date: date.toDateString(),
+            team1: teams[i],
+            team2: teams[j],
+            score1: null,
+            score2: null,
+            result: null
+        });
+    }
+}
+
+// Simulate the games
+function simulateGame(game) {
+    const score1 = getRandomScore();
+    const score2 = getRandomScore();
+    game.score1 = score1;
+    game.score2 = score2;
+
+    if (score1 > score2) {
+        game.result = `${game.team1.name} wins!`;
+        game.team1.wins += 1;
+        game.team2.losses += 1;
+        game.team1.points += 2;
+    } else if (score1 < score2) {
+        game.result = `${game.team2.name} wins!`;
+        game.team2.wins += 1;
+        game.team1.losses += 1;
+        game.team2.points += 2;
+    } else {
+        game.result = "It's a tie!";
+        game.team1.ties += 1;
+        game.team2.ties += 1;
+        game.team1.points += 1;
+        game.team2.points += 1;
+    }
+}
+
+// Update the game schedule table
+function updateScheduleTable() {
+    const scheduleBody = document.getElementById('schedule-body');
+    scheduleBody.innerHTML = '';
+
+    schedule.forEach(game => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${game.date}</td>
+            <td><img class="team-logo" src="${game.team1.logo}" alt="${game.team1.name}">${game.team1.name}</td>
+            <td>${game.score1}</td>
+            <td><img class="team-logo" src="${game.team2.logo}" alt="${game.team2.name}">${game.team2.name}</td>
+            <td>${game.score2}</td>
+            <td class="${game.result.includes('win') ? 'result-win' : (game.result.includes('tie') ? 'result-tie' : 'result-loss')}">${game.result}</td>
+        `;
+        scheduleBody.appendChild(row);
+    });
+}
+
+// Update the standings table
+function updateStandingsTable() {
+    const standingsBody = document.getElementById('standings-body');
+    standingsBody.innerHTML = '';
+
+    // Sort teams by points
+    const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
+
+    sortedTeams.forEach(team => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${team.name}</td>
+            <td>${team.wins}</td>
+            <td>${team.losses}</td>
+            <td>${team.ties}</td>
+            <td>${team.points}</td>
+        `;
+        standingsBody.appendChild(row);
+    });
+}
+
+// Simulate the entire season
+function simulateSeason() {
+    schedule.forEach(game => simulateGame(game));
+    updateScheduleTable();
+    updateStandingsTable();
+}
+</script>
+
+</body>
+</html>
