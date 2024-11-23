@@ -149,7 +149,6 @@
                     <th>Team</th>
                     <th>W</th>
                     <th>L</th>
-                    <th>T</th>
                     <th>Points</th>
                 </tr>
             </thead>
@@ -191,12 +190,11 @@ const teams = [
         logo: "https://via.placeholder.com/30?text=IW", 
         wins: 0, 
         losses: 0, 
-        ties: 0, 
         points: 0,
         players: [
-            { name: "Alex Hunter", position: "Forward", goals: 0, assists: 0, games: 0 },
-            { name: "Ben Steele", position: "Defense", goals: 0, assists: 0, games: 0 },
-            { name: "Chris Frost", position: "Goalie", goals: 0, assists: 0, games: 0 }
+            { name: "Alex Hunter", goals: 0, assists: 0, games: 0 },
+            { name: "Ben Steele", goals: 0, assists: 0, games: 0 },
+            { name: "Chris Frost", goals: 0, assists: 0, games: 0 }
         ]
     },
     { 
@@ -204,12 +202,11 @@ const teams = [
         logo: "https://via.placeholder.com/30?text=TB", 
         wins: 0, 
         losses: 0, 
-        ties: 0, 
         points: 0,
         players: [
-            { name: "Sam King", position: "Forward", goals: 0, assists: 0, games: 0 },
-            { name: "Jack Reeve", position: "Defense", goals: 0, assists: 0, games: 0 },
-            { name: "Zane Thunder", position: "Goalie", goals: 0, assists: 0, games: 0 }
+            { name: "Sam King", goals: 0, assists: 0, games: 0 },
+            { name: "Jack Reeve", goals: 0, assists: 0, games: 0 },
+            { name: "Zane Thunder", goals: 0, assists: 0, games: 0 }
         ]
     },
     { 
@@ -217,12 +214,11 @@ const teams = [
         logo: "https://via.placeholder.com/30?text=BZ", 
         wins: 0, 
         losses: 0, 
-        ties: 0, 
         points: 0,
         players: [
-            { name: "Markus North", position: "Forward", goals: 0, assists: 0, games: 0 },
-            { name: "Dylan White", position: "Defense", goals: 0, assists: 0, games: 0 },
-            { name: "Parker Gale", position: "Goalie", goals: 0, assists: 0, games: 0 }
+            { name: "Markus North", goals: 0, assists: 0, games: 0 },
+            { name: "Dylan White", goals: 0, assists: 0, games: 0 },
+            { name: "Parker Gale", goals: 0, assists: 0, games: 0 }
         ]
     },
     { 
@@ -230,12 +226,11 @@ const teams = [
         logo: "https://via.placeholder.com/30?text=RB", 
         wins: 0, 
         losses: 0, 
-        ties: 0, 
         points: 0,
         players: [
-            { name: "Liam Forge", position: "Forward", goals: 0, assists: 0, games: 0 },
-            { name: "Tyler Burns", position: "Defense", goals: 0, assists: 0, games: 0 },
-            { name: "Eli Grant", position: "Goalie", goals: 0, assists: 0, games: 0 }
+            { name: "Liam Forge", goals: 0, assists: 0, games: 0 },
+            { name: "Tyler Burns", goals: 0, assists: 0, games: 0 },
+            { name: "Eli Grant", goals: 0, assists: 0, games: 0 }
         ]
     }
 ];
@@ -246,14 +241,14 @@ let schedule = [];
 
 // Create a basic round-robin schedule
 function generateSchedule() {
+    let gamesPlayed = Array(teams.length).fill(0); // Track games played per team
+    
     for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
         let team = teams[teamIndex];
-        let gamesPlayed = 0;
         
-        // Play games against other teams until reaching the total games
-        while (gamesPlayed < totalGamesPerTeam) {
+        while (gamesPlayed[teamIndex] < totalGamesPerTeam) {
             for (let opponentIndex = 0; opponentIndex < teams.length; opponentIndex++) {
-                if (teamIndex !== opponentIndex && gamesPlayed < totalGamesPerTeam) {
+                if (teamIndex !== opponentIndex && gamesPlayed[teamIndex] < totalGamesPerTeam && gamesPlayed[opponentIndex] < totalGamesPerTeam) {
                     const opponent = teams[opponentIndex];
                     const date = new Date();
                     date.setDate(date.getDate() + schedule.length);  // Schedule games on consecutive days
@@ -267,7 +262,8 @@ function generateSchedule() {
                         result: null
                     });
 
-                    gamesPlayed++;
+                    gamesPlayed[teamIndex]++;
+                    gamesPlayed[opponentIndex]++;
                 }
             }
         }
@@ -304,16 +300,16 @@ function simulateGame(game) {
 
     // Update player stats with randomly assigned goals and assists
     game.team1.players.forEach(player => {
-        const goals = Math.floor(Math.random() * score1); // Random goals between 0 and score1
-        const assists = Math.floor(Math.random() * goals); // Random assists
+        const goals = Math.floor(Math.random() * score1); 
+        const assists = Math.floor(Math.random() * goals);
         player.goals += goals;
         player.assists += assists;
         player.games += 1;
     });
 
     game.team2.players.forEach(player => {
-        const goals = Math.floor(Math.random() * score2); // Random goals between 0 and score2
-        const assists = Math.floor(Math.random() * goals); // Random assists
+        const goals = Math.floor(Math.random() * score2); 
+        const assists = Math.floor(Math.random() * goals); 
         player.goals += goals;
         player.assists += assists;
         player.games += 1;
@@ -322,7 +318,7 @@ function simulateGame(game) {
 
 // Random score generator
 function getRandomScore() {
-    return Math.floor(Math.random() * 6) + 1; // Score range between 1 and 6
+    return Math.floor(Math.random() * 6); // Score range between 0 and 5
 }
 
 // Update the schedule table
@@ -335,10 +331,10 @@ function updateScheduleTable() {
         row.innerHTML = `
             <td>${game.date}</td>
             <td><img class="team-logo" src="${game.team1.logo}" alt="${game.team1.name}">${game.team1.name}</td>
-            <td>${game.score1}</td>
+            <td>${game.score1 !== null ? game.score1 : '--'}</td>
             <td><img class="team-logo" src="${game.team2.logo}" alt="${game.team2.name}">${game.team2.name}</td>
-            <td>${game.score2}</td>
-            <td class="${game.result.includes('win') ? 'result-win' : 'result-loss'}">${game.result}</td>
+            <td>${game.score2 !== null ? game.score2 : '--'}</td>
+            <td class="${game.result ? (game.result.includes('win') ? 'result-win' : 'result-loss') : ''}">${game.result || '--'}</td>
         `;
         scheduleBody.appendChild(row);
     });
@@ -349,7 +345,6 @@ function updateStandingsTable() {
     const standingsBody = document.getElementById('standings-body');
     standingsBody.innerHTML = '';
 
-    // Sort teams by points
     const sortedTeams = [...teams].sort((a, b) => b.points - a.points);
 
     sortedTeams.forEach(team => {
@@ -358,7 +353,6 @@ function updateStandingsTable() {
             <td>${team.name}</td>
             <td>${team.wins}</td>
             <td>${team.losses}</td>
-            <td>${team.ties}</td>
             <td>${team.points}</td>
         `;
         standingsBody.appendChild(row);
