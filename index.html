@@ -96,19 +96,10 @@
             color: red;
         }
 
-        .result-tie {
+        .result-overtime {
             color: orange;
         }
 
-        .player-stats-table th, .player-stats-table td {
-            text-align: left;
-        }
-
-        .player-stats-table td {
-            padding: 5px;
-        }
-
-        /* Scrollable tables */
         .scrollable-table {
             max-height: 400px;
             overflow-y: auto;
@@ -249,30 +240,52 @@ const teams = [
     }
 ];
 
-// Create a round-robin schedule
-const schedule = [];
-const getRandomScore = () => Math.floor(Math.random() * 6); // Random score between 0 and 5
+// Generate a full schedule with 82 games per team
+const totalGamesPerTeam = 82;
+let schedule = [];
 
-for (let i = 0; i < teams.length; i++) {
-    for (let j = i + 1; j < teams.length; j++) {
-        const date = new Date();
-        date.setDate(date.getDate() + schedule.length); // Schedule games on consecutive days
+// Create a basic round-robin schedule
+function generateSchedule() {
+    for (let teamIndex = 0; teamIndex < teams.length; teamIndex++) {
+        let team = teams[teamIndex];
+        let gamesPlayed = 0;
+        
+        // Play games against other teams until reaching the total games
+        while (gamesPlayed < totalGamesPerTeam) {
+            for (let opponentIndex = 0; opponentIndex < teams.length; opponentIndex++) {
+                if (teamIndex !== opponentIndex && gamesPlayed < totalGamesPerTeam) {
+                    const opponent = teams[opponentIndex];
+                    const date = new Date();
+                    date.setDate(date.getDate() + schedule.length);  // Schedule games on consecutive days
+                    
+                    schedule.push({
+                        date: date.toDateString(),
+                        team1: team,
+                        team2: opponent,
+                        score1: null,
+                        score2: null,
+                        result: null
+                    });
 
-        schedule.push({
-            date: date.toDateString(),
-            team1: teams[i],
-            team2: teams[j],
-            score1: null,
-            score2: null,
-            result: null
-        });
+                    gamesPlayed++;
+                }
+            }
+        }
     }
 }
 
 // Simulate the game and update player stats
 function simulateGame(game) {
-    const score1 = getRandomScore();
-    const score2 = getRandomScore();
+    let score1 = getRandomScore();
+    let score2 = getRandomScore();
+
+    // If scores are tied, add overtime
+    while (score1 === score2) {
+        // Simulate overtime: give a bonus goal randomly to break the tie
+        score1 = getRandomScore();
+        score2 = getRandomScore();
+    }
+
     game.score1 = score1;
     game.score2 = score2;
 
@@ -282,20 +295,14 @@ function simulateGame(game) {
         game.team1.wins += 1;
         game.team2.losses += 1;
         game.team1.points += 2;
-    } else if (score1 < score2) {
+    } else {
         game.result = `${game.team2.name} wins!`;
         game.team2.wins += 1;
         game.team1.losses += 1;
         game.team2.points += 2;
-    } else {
-        game.result = "It's a tie!";
-        game.team1.ties += 1;
-        game.team2.ties += 1;
-        game.team1.points += 1;
-        game.team2.points += 1;
     }
 
-    // Randomly assign goals to players (simple example)
+    // Update player stats with randomly assigned goals and assists
     game.team1.players.forEach(player => {
         const goals = Math.floor(Math.random() * score1); // Random goals between 0 and score1
         const assists = Math.floor(Math.random() * goals); // Random assists
@@ -313,6 +320,11 @@ function simulateGame(game) {
     });
 }
 
+// Random score generator
+function getRandomScore() {
+    return Math.floor(Math.random() * 6) + 1; // Score range between 1 and 6
+}
+
 // Update the schedule table
 function updateScheduleTable() {
     const scheduleBody = document.getElementById('schedule-body');
@@ -323,10 +335,10 @@ function updateScheduleTable() {
         row.innerHTML = `
             <td>${game.date}</td>
             <td><img class="team-logo" src="${game.team1.logo}" alt="${game.team1.name}">${game.team1.name}</td>
-            <td>${game.score1 !== null ? game.score1 : '--'}</td>
+            <td>${game.score1}</td>
             <td><img class="team-logo" src="${game.team2.logo}" alt="${game.team2.name}">${game.team2.name}</td>
-            <td>${game.score2 !== null ? game.score2 : '--'}</td>
-            <td class="${game.result ? (game.result.includes('win') ? 'result-win' : (game.result.includes('tie') ? 'result-tie' : 'result-loss')) : ''}">${game.result || '--'}</td>
+            <td>${game.score2}</td>
+            <td class="${game.result.includes('win') ? 'result-win' : 'result-loss'}">${game.result}</td>
         `;
         scheduleBody.appendChild(row);
     });
@@ -393,6 +405,12 @@ function simulateNextGame() {
     // Move to the next game
     currentGameIndex++;
 }
+
+// Generate the schedule when the page loads
+generateSchedule();
+updateScheduleTable();
+updateStandingsTable();
+updatePlayerStatsTable();
 </script>
 
 </body>
