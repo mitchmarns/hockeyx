@@ -3,86 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fictional Hockey League</title>
+    <title>Fictional Hockey League with Players</title>
     <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             color: #333;
-            margin: 0;
-            padding: 0;
+            padding: 20px;
         }
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            padding-top: 20px;
-        }
+
         h1 {
             text-align: center;
             color: #003366;
         }
-        .team-logo {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
-        }
-        .game-table, .standings-table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
-        }
-        .game-table th, .game-table td, .standings-table th, .standings-table td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-        .game-table th, .standings-table th {
-            background-color: #003366;
-            color: white;
-        }
-        .game-table td, .standings-table td {
+
+        /* Layout Containers */
+        .container {
+            width: 90%;
+            margin: 0 auto;
+            padding: 20px;
             background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        .team-name {
-            font-weight: bold;
-        }
-        .result-win {
-            color: green;
-        }
-        .result-loss {
-            color: red;
-        }
-        .result-tie {
-            color: orange;
-        }
-        .schedule-header, .standings-header {
+
+        .schedule-header, .standings-header, .players-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
         }
+
         .btn-simulate {
             padding: 10px 20px;
             background-color: #003366;
             color: white;
             border: none;
             cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
         }
+
         .btn-simulate:hover {
             background-color: #00509e;
+        }
+
+        .btn-simulate:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #003366;
+            color: white;
+        }
+
+        td {
+            background-color: #fff;
+        }
+
+        .team-logo {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+
+        .result-win {
+            color: green;
+        }
+
+        .result-loss {
+            color: red;
+        }
+
+        .result-tie {
+            color: orange;
+        }
+
+        .player-stats-table th, .player-stats-table td {
+            text-align: left;
+        }
+
+        .player-stats-table td {
+            padding: 5px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Fictional Hockey League</h1>
+    <h1>Fictional Hockey League with Players</h1>
 
     <!-- Game Simulation Section -->
     <div class="schedule-header">
         <h2>Season Schedule & Results</h2>
-        <button class="btn-simulate" onclick="simulateSeason()">Simulate All Games</button>
+        <button class="btn-simulate" id="simulate-button" onclick="simulateNextGame()">Simulate Next Game</button>
     </div>
-    <table class="game-table">
+
+    <!-- Schedule Table -->
+    <table id="schedule-table">
         <thead>
             <tr>
                 <th>Date</th>
@@ -94,7 +133,7 @@
             </tr>
         </thead>
         <tbody id="schedule-body">
-            <!-- Game rows will be inserted here by JavaScript -->
+            <!-- Game rows will be dynamically added -->
         </tbody>
     </table>
 
@@ -102,7 +141,9 @@
     <div class="standings-header">
         <h2>League Standings</h2>
     </div>
-    <table class="standings-table">
+
+    <!-- Standings Table -->
+    <table id="standings-table">
         <thead>
             <tr>
                 <th>Team</th>
@@ -113,18 +154,87 @@
             </tr>
         </thead>
         <tbody id="standings-body">
-            <!-- Standings rows will be inserted here by JavaScript -->
+            <!-- Standings rows will be dynamically added -->
+        </tbody>
+    </table>
+
+    <!-- Players Section -->
+    <div class="players-header">
+        <h2>Player Stats</h2>
+    </div>
+
+    <!-- Player Stats Table -->
+    <table class="player-stats-table">
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Player</th>
+                <th>Goals</th>
+                <th>Assists</th>
+                <th>Games Played</th>
+            </tr>
+        </thead>
+        <tbody id="players-body">
+            <!-- Player stats rows will be dynamically added -->
         </tbody>
     </table>
 </div>
 
 <script>
-// Define the teams
+// Define the teams and their players
 const teams = [
-    { name: "Ice Wolves", logo: "https://via.placeholder.com/30?text=IW", wins: 0, losses: 0, ties: 0, points: 0 },
-    { name: "Thunderbirds", logo: "https://via.placeholder.com/30?text=TB", wins: 0, losses: 0, ties: 0, points: 0 },
-    { name: "Blizzard", logo: "https://via.placeholder.com/30?text=BZ", wins: 0, losses: 0, ties: 0, points: 0 },
-    { name: "Raging Bulls", logo: "https://via.placeholder.com/30?text=RB", wins: 0, losses: 0, ties: 0, points: 0 }
+    { 
+        name: "Ice Wolves", 
+        logo: "https://via.placeholder.com/30?text=IW", 
+        wins: 0, 
+        losses: 0, 
+        ties: 0, 
+        points: 0,
+        players: [
+            { name: "Alex Hunter", position: "Forward", goals: 0, assists: 0, games: 0 },
+            { name: "Ben Steele", position: "Defense", goals: 0, assists: 0, games: 0 },
+            { name: "Chris Frost", position: "Goalie", goals: 0, assists: 0, games: 0 }
+        ]
+    },
+    { 
+        name: "Thunderbirds", 
+        logo: "https://via.placeholder.com/30?text=TB", 
+        wins: 0, 
+        losses: 0, 
+        ties: 0, 
+        points: 0,
+        players: [
+            { name: "Sam King", position: "Forward", goals: 0, assists: 0, games: 0 },
+            { name: "Jack Reeve", position: "Defense", goals: 0, assists: 0, games: 0 },
+            { name: "Zane Thunder", position: "Goalie", goals: 0, assists: 0, games: 0 }
+        ]
+    },
+    { 
+        name: "Blizzard", 
+        logo: "https://via.placeholder.com/30?text=BZ", 
+        wins: 0, 
+        losses: 0, 
+        ties: 0, 
+        points: 0,
+        players: [
+            { name: "Markus North", position: "Forward", goals: 0, assists: 0, games: 0 },
+            { name: "Dylan White", position: "Defense", goals: 0, assists: 0, games: 0 },
+            { name: "Parker Gale", position: "Goalie", goals: 0, assists: 0, games: 0 }
+        ]
+    },
+    { 
+        name: "Raging Bulls", 
+        logo: "https://via.placeholder.com/30?text=RB", 
+        wins: 0, 
+        losses: 0, 
+        ties: 0, 
+        points: 0,
+        players: [
+            { name: "Liam Forge", position: "Forward", goals: 0, assists: 0, games: 0 },
+            { name: "Tyler Burns", position: "Defense", goals: 0, assists: 0, games: 0 },
+            { name: "Eli Grant", position: "Goalie", goals: 0, assists: 0, games: 0 }
+        ]
+    }
 ];
 
 // Create a round-robin schedule
@@ -147,13 +257,14 @@ for (let i = 0; i < teams.length; i++) {
     }
 }
 
-// Simulate the games
+// Simulate the game and update player stats
 function simulateGame(game) {
     const score1 = getRandomScore();
     const score2 = getRandomScore();
     game.score1 = score1;
     game.score2 = score2;
 
+    // Update game stats
     if (score1 > score2) {
         game.result = `${game.team1.name} wins!`;
         game.team1.wins += 1;
@@ -171,9 +282,26 @@ function simulateGame(game) {
         game.team1.points += 1;
         game.team2.points += 1;
     }
+
+    // Randomly assign goals to players (simple example)
+    game.team1.players.forEach(player => {
+        const goals = Math.floor(Math.random() * score1); // Random goals between 0 and score1
+        const assists = Math.floor(Math.random() * goals); // Random assists
+        player.goals += goals;
+        player.assists += assists;
+        player.games += 1;
+    });
+
+    game.team2.players.forEach(player => {
+        const goals = Math.floor(Math.random() * score2); // Random goals between 0 and score2
+        const assists = Math.floor(Math.random() * goals); // Random assists
+        player.goals += goals;
+        player.assists += assists;
+        player.games += 1;
+    });
 }
 
-// Update the game schedule table
+// Update the schedule table
 function updateScheduleTable() {
     const scheduleBody = document.getElementById('schedule-body');
     scheduleBody.innerHTML = '';
@@ -183,10 +311,10 @@ function updateScheduleTable() {
         row.innerHTML = `
             <td>${game.date}</td>
             <td><img class="team-logo" src="${game.team1.logo}" alt="${game.team1.name}">${game.team1.name}</td>
-            <td>${game.score1}</td>
+            <td>${game.score1 !== null ? game.score1 : '--'}</td>
             <td><img class="team-logo" src="${game.team2.logo}" alt="${game.team2.name}">${game.team2.name}</td>
-            <td>${game.score2}</td>
-            <td class="${game.result.includes('win') ? 'result-win' : (game.result.includes('tie') ? 'result-tie' : 'result-loss')}">${game.result}</td>
+            <td>${game.score2 !== null ? game.score2 : '--'}</td>
+            <td class="${game.result ? (game.result.includes('win') ? 'result-win' : (game.result.includes('tie') ? 'result-tie' : 'result-loss')) : ''}">${game.result || '--'}</td>
         `;
         scheduleBody.appendChild(row);
     });
@@ -213,11 +341,45 @@ function updateStandingsTable() {
     });
 }
 
-// Simulate the entire season
-function simulateSeason() {
-    schedule.forEach(game => simulateGame(game));
+// Update the player stats table
+function updatePlayerStatsTable() {
+    const playersBody = document.getElementById('players-body');
+    playersBody.innerHTML = '';
+
+    teams.forEach(team => {
+        team.players.forEach(player => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${team.name}</td>
+                <td>${player.name}</td>
+                <td>${player.goals}</td>
+                <td>${player.assists}</td>
+                <td>${player.games}</td>
+            `;
+            playersBody.appendChild(row);
+        });
+    });
+}
+
+// Track the index of the next game to simulate
+let currentGameIndex = 0;
+
+// Simulate the next game
+function simulateNextGame() {
+    if (currentGameIndex >= schedule.length) {
+        alert("All games have been simulated.");
+        document.getElementById('simulate-button').disabled = true;
+        return;
+    }
+
+    const game = schedule[currentGameIndex];
+    simulateGame(game);
     updateScheduleTable();
     updateStandingsTable();
+    updatePlayerStatsTable();
+
+    // Move to the next game
+    currentGameIndex++;
 }
 </script>
 
